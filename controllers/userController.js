@@ -1,11 +1,10 @@
 const { getUsersCollection } = require('../models/userModel');
-
-// Create
+var mongo = require('mongodb');
 const createUser = async (req, res) => {
   try {
     console.log(req.body)
     const result = await getUsersCollection().insertOne(req.body);
-    
+
     console.log(result)
     res.status(201).send(result);
   } catch (err) {
@@ -28,9 +27,9 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
 
   try {
-    console.log(req.params.name)
-    const user = await getUsersCollection().findOne({ "name":req.params.id });
-    console.log(user)
+    var o_id = new mongo.ObjectId(req.params.id);
+    const user = await getUsersCollection().findOne(
+      { _id: o_id });
     if (!user) {
       res.status(404).send({ error: 'User not found' });
     } else {
@@ -44,8 +43,9 @@ const getUserById = async (req, res) => {
 // Update
 const updateUser = async (req, res) => {
   try {
+    var o_id = new mongo.ObjectId(req.params.id);
     const result = await getUsersCollection().updateOne(
-      { _id: new MongoClient.ObjectId(req.params.id) },
+      { _id: o_id },
       { $set: req.body }
     );
     if (result.matchedCount === 0) {
@@ -61,7 +61,8 @@ const updateUser = async (req, res) => {
 // Delete
 const deleteUser = async (req, res) => {
   try {
-    const result = await getUsersCollection().deleteOne({ _id: new MongoClient.ObjectId(req.params.id) });
+    var o_id = new mongo.ObjectId(req.params.id);
+    const result = await getUsersCollection().deleteOne({ _id: o_id });
     if (result.deletedCount === 0) {
       res.status(404).send({ error: 'User not found' });
     } else {
